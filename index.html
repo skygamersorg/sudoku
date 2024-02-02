@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Solver</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/skulpt/0.10.0/skulpt.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/skulpt/0.10.0/skulpt-stdlib.js"></script>
+</head>
+<body>
+    <h1>Sudoku Solver</h1>
+    <input type="file" id="fileInput" accept=".py">
+    <button onclick="solveSudoku()">Solve Sudoku</button>
+    <div id="output"></div>
+
+    <script type="text/javascript">
+        function solveSudoku() {
+            var fileInput = document.getElementById("fileInput");
+            var file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please select a file.");
+                return;
+            }
+
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                var input = event.target.result;
+                var output = document.getElementById("output");
+
+                // Skulpt configuration
+                Sk.configure({
+                    output: function(text) {
+                        output.innerHTML += text + "\n";
+                    },
+                    read: function(file) {
+                        if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][file] === undefined) {
+                            throw "File not found: '" + file + "'";
+                        }
+                        return Sk.builtinFiles["files"][file];
+                    }
+                });
+
+                Sk.misceval.asyncToPromise(function() {
+                    return Sk.importMainWithBody("<stdin>", false, input, true);
+                }).then(function(mod) {
+                    console.log("Success");
+                }, function(err) {
+                    output.innerHTML += "<strong>Error:</strong> " + err.toString() + "\n";
+                });
+            };
+
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
